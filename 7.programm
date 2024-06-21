@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
+// Function to calculate gcd of two numbers
+int gcd(int a, int b) {
+    int temp;
+    while (b != 0) {
+        temp = a % b;
+        a = b;
+        b = temp;
+    }
+    return a;
+}
+
+// Function to perform modular exponentiation
+long long int mod_exp(long long int base, long long int exp, long long int mod) {
+    long long int result = 1;
+    while (exp > 0) {
+        if (exp % 2 == 1)  // If exp is odd
+            result = (result * base) % mod;
+        base = (base * base) % mod;
+        exp = exp / 2;
+    }
+    return result;
+}
+
+// Function to generate keys
+void generate_keys(int *e, int *d, int *n) {
+    int p, q, phi, publicKey;
+    
+    // Step 1: Choose two prime numbers p and q
+    p = 17; // Example prime number 1
+    q = 19; // Example prime number 2
+    
+    // Step 2: Calculate n = p * q
+    *n = p * q;
+    
+    // Step 3: Calculate Euler's totient function f(n)
+    phi = (p - 1) * (q - 1);
+    
+    // Step 4: Choose an integer e such that 1 < e < f(n) and gcd(e, f(n)) = 1
+    publicKey = 5; // Example public key
+    
+    // Step 5: Compute d such that d = e^(-1) (mod f(n))
+    *e = publicKey;
+    *d = mod_exp(*e, -1, phi); // Here, -1 is the modular inverse of e modulo f(n)
+}
+
+// Function to encrypt plaintext
+long long int encrypt(int plaintext, int e, int n) {
+    return mod_exp(plaintext, e, n);
+}
+
+// Function to decrypt ciphertext
+long long int decrypt(long long int ciphertext, int d, int n) {
+    return mod_exp(ciphertext, d, n);
+}
+
+int main() {
+    int e, d, n;
+    generate_keys(&e, &d, &n);
+    
+    printf("Public key (e, n): (%d, %d)\n", e, n);
+    printf("Private key (d, n): (%d, %d)\n", d, n);
+    
+    int plaintext = 88; // Example plaintext
+    long long int ciphertext = encrypt(plaintext, e, n);
+    printf("Encrypted ciphertext: %lld\n", ciphertext);
+    
+    long long int decrypted_text = decrypt(ciphertext, d, n);
+    printf("Decrypted plaintext: %lld\n", decrypted_text);
+    
+    return 0;
+}
